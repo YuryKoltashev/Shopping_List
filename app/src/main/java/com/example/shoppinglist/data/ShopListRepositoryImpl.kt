@@ -15,7 +15,8 @@ class ShopListRepositoryImpl: ShopListRepository {
     init {
         for (i in 0 until 10) {
             val item = ShopItem("Name $i", i, true)
-            shopList.add(item)
+            addShopItem(item)
+            updateList()
         }
     }
 
