@@ -1,5 +1,6 @@
 package com.example.shoppinglist.data
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.shoppinglist.domain.ShopItem
@@ -7,17 +8,17 @@ import com.example.shoppinglist.domain.ShopListRepository
 import java.lang.RuntimeException
 import kotlin.random.Random
 
-class ShopListRepositoryImpl : ShopListRepository {
+object ShopListRepositoryImpl : ShopListRepository {
 
     private val shopListLD = MutableLiveData<List<ShopItem>>()
     private val shopList = sortedSetOf(Comparator<ShopItem> { p0, p1 -> p0.id.compareTo(p1.id) })
+
     private var autoIncrementId = 0
 
     init {
-        for (i in 0 until 1000) {
+        for (i in 0 until 10) {
             val item = ShopItem("Name $i", i, Random.nextBoolean())
             addShopItem(item)
-            updateList()
         }
     }
 
@@ -31,7 +32,7 @@ class ShopListRepositoryImpl : ShopListRepository {
 
     override fun editShopItem(shopItem: ShopItem) {
         val oldShopItem = getShopItem(shopItem.id)
-        removeShopItem(oldShopItem)
+        shopList.remove(oldShopItem)
         addShopItem(shopItem)
     }
 

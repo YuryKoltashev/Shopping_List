@@ -7,11 +7,9 @@ import com.example.shoppinglist.domain.*
 
 class MainViewModel: ViewModel() {
 
-    private val repository = ShopListRepositoryImpl()
+    private val repository = ShopListRepositoryImpl
 
-    private val addShopItemUseCase = AddShopItemUseCase(repository)
     private val editShopItemUseCase = EditShopItemUseCase(repository)
-    private val getShopItemUseCase = GetShopItemUseCase(repository)
     private val getShopListUseCase = GetShopListUseCase(repository)
     private val removeShopItemUseCase = RemoveShopItemUseCase(repository)
 
