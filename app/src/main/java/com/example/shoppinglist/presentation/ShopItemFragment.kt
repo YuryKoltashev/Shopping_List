@@ -16,10 +16,7 @@ import com.example.shoppinglist.domain.ShopItem
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
-class ShopItemFragment(
-    private val modeType: String = MODE_UNKNOWN,
-    private val shopItemId: Int = ShopItem.UNDEFINED_ID
-) : Fragment() {
+class ShopItemFragment : Fragment() {
 
     private lateinit var viewModel: ShopItemViewModel
 
@@ -31,6 +28,14 @@ class ShopItemFragment(
 
     private lateinit var button_Save: Button
 
+    private var modeType: String = MODE_UNKNOWN
+    private var shopItemId: Int = ShopItem.UNDEFINED_ID
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parseParam()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -41,7 +46,6 @@ class ShopItemFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        parseParam()
         viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
         initViews(view)
         addTextChangeListeners()
@@ -96,6 +100,7 @@ class ShopItemFragment(
 
         viewModel.shouldFinishActivity.observe(viewLifecycleOwner) {
             activity?.onBackPressed()
+            requireActivity().onBackPressed()
         }
     }
 
@@ -124,14 +129,21 @@ class ShopItemFragment(
     }
 
     private fun parseParam() {
-        if (modeType != MODE_ADD && modeType != MODE_EDIT) {
-            throw RuntimeException("Unknown type of mode: $modeType")
+        val args = requireArguments()
+        if (!args.containsKey(MODE_TYPE)) {
+            throw RuntimeException("Mode type is absent")
         }
-
-        if (modeType == MODE_EDIT && shopItemId == ShopItem.UNDEFINED_ID) {
-            throw RuntimeException("ShopItem Id is absent")
+        val mode = args.getString(MODE_TYPE)
+        if (mode != MODE_ADD && mode != MODE_EDIT) {
+            throw RuntimeException("Unknown type of mode: $mode")
         }
-
+        modeType = mode
+        if (modeType == MODE_EDIT) {
+            if (args.getInt(SHOP_ITEM_ID) == ShopItem.UNDEFINED_ID) {
+                throw RuntimeException("ShopItem Id is absent")
+            }
+            shopItemId = args.getInt(SHOP_ITEM_ID, ShopItem.UNDEFINED_ID)
+        }
     }
 
     private fun initViews(view: View) {
@@ -146,31 +158,27 @@ class ShopItemFragment(
 
     companion object {
 
-        private const val EXTRA_MODE_TYPE = "extra_mode_type"
-        private const val EXTRA_SHOP_ITEM_ID = "extra_shopItem_id"
+        private const val MODE_TYPE = "extra_mode_type"
+        private const val SHOP_ITEM_ID = "extra_shopItem_id"
         private const val MODE_EDIT = "mode_edit"
         private const val MODE_ADD = "mode_add"
         private const val MODE_UNKNOWN = ""
 
         fun newInstanceAddItem(): ShopItemFragment {
-            return ShopItemFragment(MODE_ADD)
+            return ShopItemFragment().apply {
+                arguments = Bundle().apply {
+                    putString(MODE_TYPE, MODE_ADD)
+                }
+            }
         }
 
         fun newInstanceEditItem(shopItemId: Int): ShopItemFragment {
-            return ShopItemFragment(MODE_EDIT, shopItemId)
-        }
-
-        fun newIntentAddItem(context: Context): Intent {
-            val intent = Intent(context, ShopItemActivity::class.java)
-            intent.putExtra(EXTRA_MODE_TYPE, MODE_ADD)
-            return intent
-        }
-
-        fun newIntentEditItem(context: Context, shopItemId: Int): Intent {
-            val intent = Intent(context, ShopItemActivity::class.java)
-            intent.putExtra(EXTRA_MODE_TYPE, MODE_EDIT)
-            intent.putExtra(EXTRA_SHOP_ITEM_ID, shopItemId)
-            return intent
+            return ShopItemFragment().apply {
+                arguments = Bundle().apply {
+                    putString(MODE_TYPE, MODE_EDIT)
+                    putInt(SHOP_ITEM_ID, shopItemId)
+                }
+            }
         }
     }
 }
