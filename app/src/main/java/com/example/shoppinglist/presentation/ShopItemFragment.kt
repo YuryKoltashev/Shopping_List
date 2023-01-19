@@ -1,7 +1,5 @@
 package com.example.shoppinglist.presentation
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -100,7 +98,6 @@ class ShopItemFragment : Fragment() {
 
         viewModel.shouldFinishActivity.observe(viewLifecycleOwner) {
             activity?.onBackPressed()
-            requireActivity().onBackPressed()
         }
     }
 
